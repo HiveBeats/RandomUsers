@@ -43,14 +43,14 @@ namespace WebApi.Features.RandomUsers.Services.ExternalApi.Helpers
             return this;
         }
 
-        public RequestBuilder ForNationality(string nationality)
+        public RequestBuilder WithNationality(string nationality)
         {
             if (!string.IsNullOrWhiteSpace(nationality))
                 _queryString.Add("nat", nationality);
             return this;
         }
 
-        public RequestBuilder IncludingFields(string csvFields)
+        public RequestBuilder WithFields(string csvFields)
         {
             if (!string.IsNullOrWhiteSpace(csvFields))
                 _queryString.Add("inc", csvFields);

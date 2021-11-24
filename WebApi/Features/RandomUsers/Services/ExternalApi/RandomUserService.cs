@@ -36,21 +36,32 @@ namespace WebApi.Features.RandomUsers.Services.ExternalApi
             return resultDto;
         }
 
+        private IEnumerable<Result> FilterRandomUsersByLocation(IEnumerable<Result> source, RandomUsersRequest filter)
+        {
+            if (!string.IsNullOrWhiteSpace(filter.Location))
+                return source.Where(x => x.location.country == filter.Location);
+
+            return source;
+        }
+
         public async Task<GetRandomUsersResponse> GetUsersAsync(RandomUsersRequest request)
         {
             var correlationId = GenerateCorrelationId();
             var requestUrlBuilder = new RequestBuilder(_config.ApiUrl)
                 .WithCount(_config.DefaultUsersToFetchCount)
-                .IncludingFields($"{RequestBuilder.Name}, {RequestBuilder.Location}, {RequestBuilder.Nationality}, {RequestBuilder.Picture}")
-                .ForNationality(request.Nationality)
+                .WithFields($"{RequestBuilder.Name}, {RequestBuilder.Location}, {RequestBuilder.Nationality}, {RequestBuilder.Picture}")
+                .WithNationality(request.Nationality)
                 .ForCorrelation(correlationId);
 
-            //request
-            var result = GetRequestAsync<Root>(requestUrlBuilder.Build());
-            
-            //filter country
-            if (string.IsNullOrWhiteSpace(request.Location))
-                return await Task.FromResult<GetRandomUsersResponse>(null);
+            var result = await GetRequestAsync<Root>(requestUrlBuilder.Build());
+
+            IEnumerable<Result> items = FilterRandomUsersByLocation(result.results, request);
+
+            return new GetRandomUsersResponse()
+            {
+                CorrelationId = correlationId,
+                Users = items.Select(x => PresentationDtoMapper.Map(x))
+            };
         }
     }
 }
