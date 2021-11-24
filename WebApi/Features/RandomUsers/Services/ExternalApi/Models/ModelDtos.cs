@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WebApi.Infrastructure;
 
 namespace WebApi.Features.RandomUsers.Services.ExternalApi.Models
 {
@@ -34,6 +35,7 @@ namespace WebApi.Features.RandomUsers.Services.ExternalApi.Models
         public string city { get; set; }
         public string state { get; set; }
         public string country { get; set; }
+        [System.Text.Json.Serialization.JsonConverter(typeof(LongToStringJsonConverter))]
         public string postcode { get; set; }
         public Coordinates coordinates { get; set; }
         public Timezone timezone { get; set; }
