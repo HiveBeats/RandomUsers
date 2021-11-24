@@ -32,7 +32,9 @@ export function RandomUsersListComponent(props: PropType) {
                     <tbody>
                         {props.items && props.items.map((item: IRandomUser, index: number) => (
                             <tr className="" key={`listItem-${index}`}>
-                                <td>{item.picture}</td>
+                                <td>
+                                    <img src={item.picture} alt={item.fullName}></img>
+                                </td>
                                 <td>{item.fullName}</td>
                                 <td>{item.location}</td>
                                 <td>{item.nationality}</td>
