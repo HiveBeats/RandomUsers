@@ -18,9 +18,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Features\RandomUsers\Services\" />
-      <Folder Include="Features\RandomUsers\Responses\" />
-      <Folder Include="Features\RandomUsers\Requests\" />
       <Folder Include="Migrations\" />
     </ItemGroup>
 

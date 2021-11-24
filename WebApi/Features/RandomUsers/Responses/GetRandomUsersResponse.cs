@@ -12,6 +12,7 @@ namespace WebApi.Features.RandomUsers.Responses
         public string Nationality { get; set; }
         public string Picture { get; set; }
     }
+
     public class GetRandomUsersResponse
     {
         public string CorrelationId { get; set; }

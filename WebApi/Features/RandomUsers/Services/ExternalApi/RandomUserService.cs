@@ -16,6 +16,7 @@ namespace WebApi.Features.RandomUsers.Services.ExternalApi
     public class RandomUserService: IRandomUserService
     {
         private readonly RandomUserServiceConfig _config;
+        //todo: use HttpClientFactory instead
         private static readonly HttpClient _client = new HttpClient();
 
         public RandomUserService(IOptions<RandomUserServiceConfig> config)
@@ -48,14 +49,14 @@ namespace WebApi.Features.RandomUsers.Services.ExternalApi
         {
             var correlationId = GenerateCorrelationId();
             var requestUrlBuilder = new RequestBuilder(_config.ApiUrl)
-                .WithCount(_config.DefaultUsersToFetchCount)
+                .WithCount(request.Count ?? _config.DefaultUsersToFetchCount)
                 .WithFields($"{RequestBuilder.Name}, {RequestBuilder.Location}, {RequestBuilder.Nationality}, {RequestBuilder.Picture}")
                 .WithNationality(request.Nationality)
                 .ForCorrelation(correlationId);
 
             var result = await GetRequestAsync<Root>(requestUrlBuilder.Build());
 
-            IEnumerable<Result> items = FilterRandomUsersByLocation(result.results, request);
+            var items = FilterRandomUsersByLocation(result.results, request);
 
             return new GetRandomUsersResponse()
             {
