@@ -1,25 +1,12 @@
-//#define MIGRATE
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using WebApi.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Pomelo.EntityFrameworkCore.MySql;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using WebApi.Configuration;
-using Microsoft.AspNetCore.Identity;
 using WebApi.Middlewares;
 
 namespace WebApi
@@ -37,30 +24,13 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            var connectionString = Configuration.GetConnectionString("QueueDb");
-            services.AddDbContext<AppDbContext>(options => options
-                .UseMySql(connectionString)
-                .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()))
-                );
-
-            services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<AppDbContext>();
-
-            #if !MIGRATE
-
-            var jwtConfigSection = Configuration.GetSection("jwtTokenConfig");
-            var jwtConfig = jwtConfigSection.Get<JwtTokenConfig>();
-            services.Configure<JwtTokenConfig>(jwtConfigSection);
-            services.AddJwt(jwtConfig);
-
+            
             var randomUserServiceSection = Configuration.GetSection(nameof(RandomUserServiceConfig));
             services.Configure<RandomUserServiceConfig>(randomUserServiceSection);
 
             services.AddHttpContextAccessor();
 
             InjectAllFeatures(services);
-            
-            #endif
 
             services.AddHealthChecks();
             
@@ -75,27 +45,6 @@ namespace WebApi
                         Name = "Ivan Laletin",
                         Url = new Uri("https://e1lama.ru")
                     }
-                });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme 
-                {
-                    In = ParameterLocation.Header, 
-                    Description = "Please insert JWT with Bearer into field",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey 
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement 
-                {
-                    { 
-                        new OpenApiSecurityScheme 
-                        { 
-                            Reference = new OpenApiReference 
-                            { 
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer" 
-                            } 
-                        },
-                        new string[] { } 
-                    } 
                 });
             });
             
@@ -119,12 +68,7 @@ namespace WebApi
             }
             else 
             {
-                //migrate in production
-                using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
-                {
-                    var context = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    context.Database.Migrate();
-                }
+                
             }
 
             app.UseHttpsRedirection();
@@ -136,37 +80,7 @@ namespace WebApi
             });
             
             app.UseRouting();
-            /* 
-            Serving Frontend Feature
 
-            app.UseDefaultFiles();
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                HttpsCompression = HttpsCompressionMode.Compress,
-                OnPrepareResponse = (ctx) =>
-                {
-                    if (!env.IsDevelopment())
-                    {
-                        if (ctx.File.Name == "index.html")
-                        {
-                            ctx.Context.Response.Headers.Add("Cache-Control", "no-cache, no-store");
-                            ctx.Context.Response.Headers.Add("Expires", "-1");
-                        }
-                        else
-                        {
-                            ctx.Context.Response.Headers.Add("Cache-Control", "max-age=31536000");
-                            ctx.Context.Response.Headers.Add("Expires", "31536000");
-                        }
-                    }
-                }
-            });
-            */
-            /*
-            
-            // Turn off SSL Certficate check
-            ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
-            
-            */
             app.UseCors("AllowAll");
             
             app.UseAuthentication();
@@ -187,36 +101,6 @@ namespace WebApi
                 var instance = Activator.CreateInstance(i);
                 (instance as InjectorBase)?.Inject(services);
             }
-        }
-    }
-
-    public static class ServiceCollectionExtensions
-    {
-        public static void AddJwt(this IServiceCollection services, JwtTokenConfig jwtConfig)
-        {
-            services.AddSingleton(jwtConfig);
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(x =>
-            {
-                //Allow auth without https
-                //x.RequireHttpsMetadata = false;
-                x.RequireHttpsMetadata = true;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtConfig.Issuer,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtConfig.Secret)),
-                    ValidAudience = jwtConfig.Audience,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.FromMinutes(1)
-                };
-            });
         }
     }
 }
