@@ -14,6 +14,7 @@ import { WeatherForecastComponent } from './Weather/Components/WeatherForecastCo
 import { LoginComponent } from './Shared/Auth/LoginComponent';
 import { Toast } from 'primereact/toast';
 import TokenService from './Shared/Auth/TokenService';
+import { RandomUsersPageComponent } from './RandomUsers/Components/RandomUsersPageComponent';
 
 function App() {
   const { pathname } = useLocation();
@@ -33,7 +34,7 @@ function App() {
     eventBus.on("movetologin", () => {
       TokenService.removeUser();
       history.push("/login");
-      eventBus.dispatch("error", "Ошибка авторизации: пожалуйста, авторизуйтесь снова");
+      eventBus.dispatch("error", "Auth error: please, log in");
     });
 
     return () => {
@@ -49,7 +50,7 @@ function App() {
       <div className="container-fluid py-4">
         <Switch>
             <Redirect from="/:url*(/+)" to={pathname.slice(0, -1)} />
-            <Route exact path="/" component={WeatherForecastComponent} />
+            <Route exact path="/" component={RandomUsersPageComponent} />
             <Route path="/login" component={LoginComponent} />
             <Redirect from="*" to="/" />
         </Switch>

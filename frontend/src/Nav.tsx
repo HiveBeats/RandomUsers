@@ -6,7 +6,7 @@ export default function Nav() {
     return (
         <nav className="navbar navbar-expand navbar-dark bg-dark">
             <div className="navbar-nav">
-                <NavLink exact to="/weather" className="nav-item nav-link">Weather Forecasts</NavLink>
+                <NavLink exact to="/" className="nav-item nav-link">Random Users</NavLink>
             </div>
         </nav>
     );
