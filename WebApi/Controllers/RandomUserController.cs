@@ -31,5 +31,19 @@ namespace WebApi.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("file")]
+        public async Task<IActionResult> ExportToFile([FromQuery]ExportToFileRequest request)
+        {
+            if (request == null || !ModelState.IsValid)
+                return BadRequest("Incorrect Parameters");
+
+            var file = await _service.ExportToFileAsync(request);
+
+            var contentType = "application/octet-stream";
+            var fileName = "export.csv";
+
+            return File(file, contentType, fileName);
+        }
     }
 }
