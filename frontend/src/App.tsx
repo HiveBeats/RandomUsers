@@ -10,7 +10,6 @@ import 'primeflex/primeflex.css';
 
 import { Route, Switch, Redirect, useLocation, useHistory } from 'react-router-dom';
 import Nav from './Nav';
-import { WeatherForecastComponent } from './Weather/Components/WeatherForecastComponent';
 import { LoginComponent } from './Shared/Auth/LoginComponent';
 import { Toast } from 'primereact/toast';
 import TokenService from './Shared/Auth/TokenService';
